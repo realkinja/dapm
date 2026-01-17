@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Date-A-Package-Manager Dialog",
+  "description": "A dialog object, consisting of a line, attitude, options and relationship things.",
+  "type": "object",
+  "properties": {
+    "line": {
+      "description": "The line that a character is going to say.",
+      "type": "string"
+    },
+    "attitude": {
+      "description": "How the character is feeling when saying the dialog.",
+      "enum": ["negative", "neutral", "positive"]
+    },
+    "affectsRelationship": {
+      "description": "Whether or not the relationship status should be affected by this dialog, which will be based on the attitude property.",
+      "type": "boolean"
+    },
+    "options": {
+      "description": "The options that a player can take.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "line": {
+            "description": "How the player will respond.",
+            "type": "string"
+          },
+          "tone": {
+            "description": "The tone of the option, characters will respond as needed.",
+            "enum": ["negative", "neutral", "positive"]
+          }
+        },
+        "required": ["line", "tone"]
+      },
+      "uniqueItems": true,
+      "minItems": 2
+    }
+  },
+  "additionalProperties": false,
+  "required": ["line", "attitude", "affectsRelationship"]
+}
