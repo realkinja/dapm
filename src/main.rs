@@ -17,6 +17,14 @@ async fn main() {
 
             match ollama.generate(model, None, Some(system_prompt)).await {
                 Ok(response) => {
+                    println!("=== Statistics ===");
+                    println!("Generation duration: {}", response.total_duration);
+                    println!("Load duration: {}", response.load_duration);
+                    println!("Input tokens: {}", response.prompt_eval_count);
+                    println!("Time evaluating prompt: {}", response.prompt_eval_duration);
+                    println!("Output tokens: {}", response.eval_count);
+                    println!("Time evaluating prompt: {}", response.eval_duration);
+
                     let dialog: Result<Dialog, anyhow::Error> = response.try_into();
                     match dialog {
                         Ok(dialog) => {
