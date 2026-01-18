@@ -9,17 +9,17 @@ pub struct Ollama {
 
 #[derive(Serialize, Deserialize)]
 pub struct Response {
-    model: String,
+    pub model: String,
     pub response: String,
-    thinking: String,
-    done: bool,
-    done_reason: String,
-    total_duration: f64,
-    load_duration: f64,
-    prompt_eval_count: f64,
-    prompt_eval_duration: f64,
-    eval_count: f64,
-    eval_duration: f64,
+    pub thinking: String,
+    pub done: bool,
+    pub done_reason: String,
+    pub total_duration: f64,
+    pub load_duration: f64,
+    pub prompt_eval_count: f64,
+    pub prompt_eval_duration: f64,
+    pub eval_count: f64,
+    pub eval_duration: f64,
 }
 
 impl Ollama {
