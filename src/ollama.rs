@@ -77,13 +77,20 @@ impl Ollama {
         }
     }
 
-    pub async fn generate(&self, model: &str, prompt: &str) -> Result<Response, anyhow::Error> {
+    pub async fn generate(
+        &self,
+        model: &str,
+        prompt: Option<&str>,
+        system_prompt: Option<&str>,
+    ) -> Result<Response, anyhow::Error> {
         let client = reqwest::Client::new();
         let json = json!({
             "model": model,
-            "prompt": prompt,
+            "prompt": prompt.unwrap_or(""),
+            "system": prompt.unwrap_or(""),
             "stream": false
         });
+
         let request = client
             .post(format!("{}/api/generate", self.api_path))
             .json(&json)

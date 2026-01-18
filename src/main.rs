@@ -6,7 +6,7 @@ use crate::dialog::Dialog;
 async fn main() {
     let ollama = ollama::Ollama::default();
     let model = "gpt-oss:20b";
-    let prompt = include_str!("../master-prompt.md");
+    let system_prompt = include_str!("../master-prompt.md");
     match ollama.version().await {
         Ok(version) => {
             println!("[INFO] Running ollama v{}", version);
@@ -15,7 +15,7 @@ async fn main() {
                 Err(err) => eprintln!("[ERR] Could not pull model! {}", err),
             }
 
-            match ollama.generate(model, prompt).await {
+            match ollama.generate(model, None, Some(system_prompt)).await {
                 Ok(response) => {
                     let dialog: Result<Dialog, anyhow::Error> = response.try_into();
                     match dialog {
