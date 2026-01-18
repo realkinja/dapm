@@ -7,7 +7,7 @@ pub struct Ollama {
     api_path: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Response {
     pub model: String,
     pub response: String,
@@ -86,8 +86,8 @@ impl Ollama {
         let client = reqwest::Client::new();
         let json = json!({
             "model": model,
-            "prompt": prompt.unwrap_or(""),
-            "system": prompt.unwrap_or(""),
+            "prompt": prompt.unwrap_or(" "),
+            "system": prompt.unwrap_or(" "),
             "stream": false
         });
 
