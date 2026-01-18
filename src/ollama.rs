@@ -11,7 +11,7 @@ pub struct Ollama {
 pub struct Response {
     pub model: String,
     pub response: String,
-    pub thinking: String,
+    pub thinking: Option<String>,
     pub done: bool,
     pub done_reason: String,
     pub total_duration: f64,
@@ -87,7 +87,7 @@ impl Ollama {
         let json = json!({
             "model": model,
             "prompt": prompt.unwrap_or(" "),
-            "system": prompt.unwrap_or(" "),
+            "system": system_prompt.unwrap_or(" "),
             "stream": false
         });
 
