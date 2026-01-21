@@ -5,17 +5,16 @@ use crate::dialog::Dialog;
 #[tokio::main]
 async fn main() {
     let ollama = ollama::Ollama::default();
-    let model = "gpt-oss:20b";
     let system_prompt = include_str!("../master-prompt.md");
     match ollama.version().await {
         Ok(version) => {
             println!("[INFO] Running ollama v{}", version);
-            match ollama.pull_model(model).await {
-                Ok(_) => println!("[OK] Pulled {} successfully!", model),
+            match ollama.pull_model().await {
+                Ok(_) => println!("[OK] Pulled {} successfully!", ollama.model),
                 Err(err) => eprintln!("[ERR] Could not pull model! {}", err),
             }
 
-            match ollama.generate(model, None, Some(system_prompt)).await {
+            match ollama.generate(None, Some(system_prompt)).await {
                 Ok(response) => {
                     println!("=== Statistics ===");
                     println!("Generation duration: {}", response.total_duration);

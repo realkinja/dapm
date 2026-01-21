@@ -4,7 +4,9 @@ use serde_json::json;
 
 pub struct Ollama {
     // The URL that API requests will get sent to.
-    api_path: String,
+    pub api_path: String,
+    // The preferred model.
+    pub model: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -44,10 +46,10 @@ impl Ollama {
         }
     }
 
-    pub async fn pull_model(&self, model: &str) -> Result<(), anyhow::Error> {
+    pub async fn pull_model(&self) -> Result<(), anyhow::Error> {
         let client = reqwest::Client::new();
         let json = json!({
-            "model": model,
+            "model": self.model,
             "stream": false
         });
 
@@ -79,13 +81,12 @@ impl Ollama {
 
     pub async fn generate(
         &self,
-        model: &str,
         prompt: Option<&str>,
         system_prompt: Option<&str>,
     ) -> Result<Response, anyhow::Error> {
         let client = reqwest::Client::new();
         let json = json!({
-            "model": model,
+            "model": self.model,
             "prompt": prompt.unwrap_or(" "),
             "system": system_prompt.unwrap_or(" "),
             "stream": false
@@ -114,6 +115,7 @@ impl Default for Ollama {
     fn default() -> Self {
         Ollama {
             api_path: String::from("http://localhost:11434"),
+            model: String::from("gpt-oss:20b"),
         }
     }
 }
