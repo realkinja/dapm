@@ -1,6 +1,7 @@
 mod app;
 mod dialog;
 mod ollama;
+mod ui;
 use crate::app::App;
 use std::io;
 
