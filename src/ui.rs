@@ -1,39 +1,75 @@
 use crate::app::App;
 use ratatui::{
-    Frame, style::Style, style::Stylize, symbols::border, text::Line, text::Text, widgets::Block,
-    widgets::Paragraph,
+    Frame,
+    buffer::Buffer,
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    prelude::Widget,
+    style::{Modifier, Style, Stylize, palette::tailwind::*},
+    symbols::border,
+    text::{Line, Text},
+    widgets::{Block, List, ListItem, Paragraph},
 };
 
+const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
+
 pub fn ui(frame: &mut Frame, app: &App) {
-    let title = Line::from("Arti".bold());
-    let instructions = Line::from(vec![
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(2),
+            Constraint::Fill(1),
+            Constraint::Length(1),
+        ])
+        .split(frame.area());
+
+    render_header(frame, chunks[0]);
+    render_footer(frame, chunks[2]);
+
+    if let Some(dialog) = &app.current_dialog {
+        let main_chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([Constraint::Fill(1), Constraint::Fill(1)])
+            .split(chunks[1]);
+
+        let dialog_line = Line::styled(dialog.line.clone(), Style::default().bold());
+
+        let mut list_items = Vec::<ListItem>::new();
+        if let Some(options) = &dialog.options {
+            for option in options {
+                let option = format!("{} ({})", option.line, option.tone);
+                let line = Line::from(option);
+                list_items.push(ListItem::new(line));
+            }
+        }
+
+        let paragraph = Paragraph::new(dialog_line);
+        frame.render_widget(paragraph, main_chunks[0]);
+        let list = List::new(list_items)
+            .highlight_symbol(">")
+            .highlight_style(SELECTED_STYLE);
+        frame.render_widget(list, main_chunks[1]);
+    } else {
+        let paragraph = Paragraph::new("Please generate a dialog.")
+            .centered()
+            .bold();
+        frame.render_widget(paragraph, chunks[1]);
+    }
+}
+
+fn render_header(frame: &mut Frame, area: Rect) {
+    let header = Paragraph::new("Date-A-Package-Manager!").bold().centered();
+
+    frame.render_widget(header, area);
+}
+
+fn render_footer(frame: &mut Frame, area: Rect) {
+    let line = Line::from(vec![
         "Quit ".into(),
         "<Q> ".blue().bold(),
         " Generate dialog ".into(),
         "<Enter>".blue().bold(),
     ]);
+    let footer = Paragraph::new(line).centered();
 
-    let block = Block::bordered()
-        .title(title)
-        .title_bottom(instructions)
-        .border_set(border::PLAIN);
-
-    if let Some(dialog) = &app.current_dialog {
-        let dialog_line = Line::styled(dialog.line.clone(), Style::default().bold());
-        let mut lines: Vec<Line> = vec![dialog_line];
-        if let Some(options) = &dialog.options {
-            for option in options {
-                let option = format!("> {} ({})", option.line, option.tone);
-                lines.push(Line::from(option));
-            }
-        }
-
-        let text = Text::from(lines);
-
-        let paragraph = Paragraph::new(text).block(block);
-        frame.render_widget(paragraph, frame.area());
-    } else {
-        let paragraph = Paragraph::new("Please generate a dialog.").block(block);
-        frame.render_widget(paragraph, frame.area());
-    }
+    frame.render_widget(footer, area);
 }
