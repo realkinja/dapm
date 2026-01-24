@@ -294,6 +294,7 @@ name = "dapm"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "crossterm",
  "ratatui",
  "reqwest",
  "serde",

@@ -3,7 +3,7 @@ use anyhow::bail;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Attitude {
     #[serde(rename = "negative")]
     Negative,
@@ -23,7 +23,7 @@ impl fmt::Display for Attitude {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Dialog {
     pub line: String,
     pub attitude: Attitude,
@@ -44,7 +44,7 @@ impl TryInto<Dialog> for Response {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct DialogOption {
     pub line: String,
     pub tone: Attitude,

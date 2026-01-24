@@ -2,6 +2,7 @@ use anyhow::bail;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+#[derive(Debug)]
 pub struct Ollama {
     // The URL that API requests will get sent to.
     pub api_path: String,
