@@ -1,4 +1,4 @@
-use crate::dialog::{Dialog, DialogOption};
+use crate::dialog::Dialog;
 use crate::ollama::Ollama;
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::{
