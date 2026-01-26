@@ -1,13 +1,10 @@
 use crate::app::App;
 use ratatui::{
     Frame,
-    buffer::Buffer,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
-    prelude::Widget,
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style, Stylize, palette::tailwind::*},
-    symbols::border,
-    text::{Line, Text},
-    widgets::{Block, List, ListItem, Paragraph},
+    text::Line,
+    widgets::{List, ListItem, Paragraph},
 };
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
@@ -28,7 +25,7 @@ pub fn ui(frame: &mut Frame, app: &App) {
     if let Some(dialog) = &app.current_dialog {
         let main_chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Fill(1), Constraint::Fill(1)])
+            .constraints([Constraint::Min(2), Constraint::Percentage(100)])
             .split(chunks[1]);
 
         let dialog_line = Line::styled(dialog.line.clone(), Style::default().bold());
@@ -49,10 +46,15 @@ pub fn ui(frame: &mut Frame, app: &App) {
             .highlight_style(SELECTED_STYLE);
         frame.render_widget(list, main_chunks[1]);
     } else {
-        let paragraph = Paragraph::new("Please generate a dialog.")
-            .centered()
-            .bold();
-        frame.render_widget(paragraph, chunks[1]);
+        if let Some(error) = &app.error {
+            let paragraph = Paragraph::new(error.as_str()).centered().red().bold();
+            frame.render_widget(paragraph, chunks[1]);
+        } else {
+            let paragraph = Paragraph::new("Please generate a dialog.")
+                .centered()
+                .bold();
+            frame.render_widget(paragraph, chunks[1]);
+        }
     }
 }
 
