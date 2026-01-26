@@ -11,6 +11,7 @@ pub struct App {
     pub current_dialog: Option<Dialog>,
     pub master_prompt: String,
     pub exit: bool,
+    pub error: Option<String>,
 }
 
 impl Default for App {
@@ -20,6 +21,7 @@ impl Default for App {
             current_dialog: None,
             master_prompt: String::new(),
             exit: false,
+            error: None,
         }
     }
 }
@@ -69,10 +71,10 @@ impl App {
                 let dialog: Result<Dialog, anyhow::Error> = response.try_into();
                 match dialog {
                     Ok(dialog) => self.current_dialog = Some(dialog),
-                    Err(err) => eprintln!("couldn't parse into dialog: {}", err),
+                    Err(err) => self.error = Some(err.to_string()),
                 }
             }
-            Err(err) => eprintln!("couldn't get response: {}", err),
+            Err(err) => self.error = Some(err.to_string()),
         }
     }
 }
