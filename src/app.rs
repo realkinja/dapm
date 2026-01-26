@@ -27,10 +27,6 @@ impl Default for App {
 }
 
 impl App {
-    pub fn new() -> App {
-        Self::default()
-    }
-
     pub async fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
         while !self.exit {
             terminal.draw(|frame| ui(frame, self))?;
