@@ -26,8 +26,7 @@ pub struct Response {
 }
 
 impl Ollama {
-    pub async fn version(&self) -> Result<String, anyhow::Error> {
-        let client = reqwest::Client::new();
+    pub async fn version(&self, client: &reqwest::Client) -> Result<String, anyhow::Error> {
         let request = client
             .get(format!("{}/api/version", self.api_path))
             .send()
@@ -47,8 +46,7 @@ impl Ollama {
         }
     }
 
-    pub async fn pull_model(&self) -> Result<(), anyhow::Error> {
-        let client = reqwest::Client::new();
+    pub async fn pull_model(&self, client: &reqwest::Client) -> Result<(), anyhow::Error> {
         let json = json!({
             "model": self.model,
             "stream": false
@@ -84,8 +82,8 @@ impl Ollama {
         &self,
         prompt: Option<&str>,
         system_prompt: Option<&str>,
+        client: &reqwest::Client,
     ) -> Result<Response, anyhow::Error> {
-        let client = reqwest::Client::new();
         let json = json!({
             "model": self.model,
             "prompt": prompt.unwrap_or(" "),

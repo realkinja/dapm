@@ -8,6 +8,7 @@ use std::io;
 #[derive(Debug)]
 pub struct App {
     pub ollama: Ollama,
+    pub http_client: reqwest::Client,
     pub current_dialog: Option<Dialog>,
     pub master_prompt: String,
     pub exit: bool,
@@ -20,6 +21,7 @@ impl Default for App {
             ollama: Ollama::default(),
             current_dialog: None,
             master_prompt: String::new(),
+            http_client: reqwest::Client::new(),
             exit: false,
             error: None,
         }
@@ -61,9 +63,13 @@ impl App {
     }
 
     pub async fn get_dialog(&mut self) {
-        let ollama_response = self.ollama.generate(None, Some(&self.master_prompt)).await;
+        let ollama_response = self
+            .ollama
+            .generate(None, Some(&self.master_prompt), &self.http_client)
+            .await;
         match ollama_response {
             Ok(response) => {
+                println!("{:#?}", response.response);
                 let dialog: Result<Dialog, anyhow::Error> = response.try_into();
                 match dialog {
                     Ok(dialog) => self.current_dialog = Some(dialog),

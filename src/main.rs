@@ -4,7 +4,6 @@ mod dialog;
 mod ollama;
 mod ui;
 use clap::Parser;
-use reqwest::dns::Name;
 
 use crate::{app::App, cli::Cli, ollama::Ollama};
 use std::io;
