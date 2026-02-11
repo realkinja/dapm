@@ -26,6 +26,7 @@ pub struct Response {
 }
 
 impl Ollama {
+    #[allow(dead_code)]
     pub async fn version(&self, client: &reqwest::Client) -> Result<String, anyhow::Error> {
         let request = client
             .get(format!("{}/api/version", self.api_path))
@@ -46,6 +47,7 @@ impl Ollama {
         }
     }
 
+    #[allow(dead_code)]
     pub async fn pull_model(&self, client: &reqwest::Client) -> Result<(), anyhow::Error> {
         let json = json!({
             "model": self.model,
@@ -78,6 +80,7 @@ impl Ollama {
         }
     }
 
+    #[allow(dead_code)]
     pub async fn generate(
         &self,
         prompt: Option<&str>,
