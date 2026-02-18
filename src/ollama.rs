@@ -85,12 +85,14 @@ impl Ollama {
         &self,
         prompt: Option<&str>,
         system_prompt: Option<&str>,
+        format: Option<&str>,
         client: &reqwest::Client,
     ) -> Result<Response, anyhow::Error> {
         let json = json!({
             "model": self.model,
             "prompt": prompt.unwrap_or(" "),
             "system": system_prompt.unwrap_or(" "),
+            "format": format.unwrap_or(" "),
             "stream": false
         });
 

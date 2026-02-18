@@ -1,6 +1,6 @@
-use crate::dialog::Dialog;
 use crate::ollama::Ollama;
 use crate::ui::ui;
+use crate::{JSON_SCHEMATIC, dialog::Dialog};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use ratatui::DefaultTerminal;
 use std::io;
@@ -65,7 +65,12 @@ impl App {
     pub async fn get_dialog(&mut self) {
         let ollama_response = self
             .ollama
-            .generate(None, Some(&self.master_prompt), &self.http_client)
+            .generate(
+                None,
+                Some(&self.master_prompt),
+                Some(JSON_SCHEMATIC),
+                &self.http_client,
+            )
             .await;
         match ollama_response {
             Ok(response) => {
