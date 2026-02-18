@@ -3,10 +3,12 @@ mod cli;
 mod dialog;
 mod ollama;
 mod ui;
-use clap::Parser;
 
 use crate::{app::App, cli::Cli, ollama::Ollama};
+use clap::Parser;
 use std::io;
+
+const JSON_SCHEMATIC: &str = include_str!("../json-schema.json");
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
