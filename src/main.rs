@@ -16,7 +16,7 @@ async fn main() -> io::Result<()> {
     let mut app = {
         if let Some(custom_model) = cli.model {
             App {
-                master_prompt: include_str!("../master-prompt.md").to_string(),
+                master_prompt: include_str!("../prompt.md").to_string(),
                 ollama: Ollama {
                     model: custom_model,
                     ..Default::default()
