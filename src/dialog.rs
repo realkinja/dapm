@@ -1,5 +1,6 @@
 use crate::ollama::Response;
 use anyhow::bail;
+use ratatui::widgets::{ListItem, ListState};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -30,6 +31,18 @@ pub struct Dialog {
     #[serde(rename = "affectsRelationship")]
     pub affects_relationship: bool,
     pub options: Option<Vec<DialogOption>>,
+}
+
+#[derive(Debug)]
+pub struct DialogOptionList {
+    pub items: Vec<DialogOption>,
+    pub state: ListState,
+}
+
+impl From<&DialogOption> for ListItem<'_> {
+    fn from(value: &DialogOption) -> Self {
+        ListItem::new(value.line.clone())
+    }
 }
 
 impl TryInto<Dialog> for Response {

@@ -84,15 +84,13 @@ impl Ollama {
     pub async fn generate(
         &self,
         prompt: Option<&str>,
-        system_prompt: Option<&str>,
-        format: Option<&str>,
+        system: Option<&str>,
         client: &reqwest::Client,
     ) -> Result<Response, anyhow::Error> {
         let json = json!({
             "model": self.model,
             "prompt": prompt.unwrap_or(" "),
-            "system": system_prompt.unwrap_or(" "),
-            "format": format.unwrap_or(" "),
+            "system": system.unwrap_or(" "),
             "stream": false
         });
 
@@ -106,7 +104,9 @@ impl Ollama {
             Ok(response) => {
                 let json: Result<Response, reqwest::Error> = response.json().await;
                 match json {
-                    Ok(response) => return Ok(response),
+                    Ok(response) => {
+                        return Ok(response);
+                    }
                     Err(err) => bail!("{}", err),
                 }
             }
