@@ -1,10 +1,10 @@
 use crate::ollama::Response;
 use anyhow::bail;
-use ratatui::widgets::{ListItem, ListState};
+use ratatui::widgets::ListItem;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Attitude {
     #[serde(rename = "negative")]
     Negative,
@@ -33,12 +33,6 @@ pub struct Dialog {
     pub options: Option<Vec<DialogOption>>,
 }
 
-#[derive(Debug)]
-pub struct DialogOptionList {
-    pub items: Vec<DialogOption>,
-    pub state: ListState,
-}
-
 impl From<&DialogOption> for ListItem<'_> {
     fn from(value: &DialogOption) -> Self {
         ListItem::new(value.line.clone())
@@ -57,7 +51,7 @@ impl TryInto<Dialog> for Response {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DialogOption {
     pub line: String,
     pub tone: Attitude,
