@@ -25,8 +25,13 @@ pub struct Response {
     pub eval_duration: f64,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Model {
+    pub name: String,
+    pub model: String,
+}
+
 impl Ollama {
-    #[allow(dead_code)]
     pub async fn version(&self, client: &reqwest::Client) -> Result<String, anyhow::Error> {
         let request = client
             .get(format!("{}/api/version", self.api_path))
@@ -47,7 +52,32 @@ impl Ollama {
         }
     }
 
-    #[allow(dead_code)]
+    pub async fn models(&self, client: &reqwest::Client) -> Result<Vec<Model>, anyhow::Error> {
+        let request = client
+            .get(format!("{}/api/tags", self.api_path))
+            .send()
+            .await;
+
+        match request {
+            Ok(response) => {
+                let json: Result<serde_json::Value, reqwest::Error> = response.json().await;
+                match &json {
+                    Ok(value) => {
+                        let models_value = value.get("models");
+                        if let Some(array) = models_value {
+                            let models: Vec<Model> = serde_json::from_value(array.clone()).unwrap();
+                            Ok(models)
+                        } else {
+                            bail!("did not return model list")
+                        }
+                    }
+                    Err(err) => bail!("{}", err),
+                }
+            }
+            Err(err) => bail!("{}", err),
+        }
+    }
+
     pub async fn pull_model(&self, client: &reqwest::Client) -> Result<(), anyhow::Error> {
         let json = json!({
             "model": self.model,
@@ -80,19 +110,16 @@ impl Ollama {
         }
     }
 
-    #[allow(dead_code)]
     pub async fn generate(
         &self,
         prompt: Option<&str>,
-        system_prompt: Option<&str>,
-        format: Option<&str>,
+        system: Option<&str>,
         client: &reqwest::Client,
     ) -> Result<Response, anyhow::Error> {
         let json = json!({
             "model": self.model,
             "prompt": prompt.unwrap_or(" "),
-            "system": system_prompt.unwrap_or(" "),
-            "format": format.unwrap_or(" "),
+            "system": system.unwrap_or(" "),
             "stream": false
         });
 
@@ -106,7 +133,9 @@ impl Ollama {
             Ok(response) => {
                 let json: Result<Response, reqwest::Error> = response.json().await;
                 match json {
-                    Ok(response) => return Ok(response),
+                    Ok(response) => {
+                        return Ok(response);
+                    }
                     Err(err) => bail!("{}", err),
                 }
             }

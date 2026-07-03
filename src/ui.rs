@@ -1,15 +1,15 @@
-use crate::app::App;
+use crate::app::{App, AppState};
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Modifier, Style, Stylize, palette::tailwind::*},
-    text::Line,
-    widgets::{List, ListItem, Paragraph},
+    text::{Line, Span},
+    widgets::{List, ListItem, Paragraph, Wrap},
 };
 
 const SELECTED_STYLE: Style = Style::new().bg(SLATE.c800).add_modifier(Modifier::BOLD);
 
-pub fn ui(frame: &mut Frame, app: &App) {
+pub fn ui(frame: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -19,47 +19,87 @@ pub fn ui(frame: &mut Frame, app: &App) {
         ])
         .split(frame.area());
 
-    render_header(frame, chunks[0]);
+    render_header(frame, chunks[0], &app.app_state);
     render_footer(frame, chunks[2]);
 
     if let Some(dialog) = &app.current_dialog {
         let main_chunks = Layout::default()
             .direction(Direction::Vertical)
-            .constraints([Constraint::Min(2), Constraint::Percentage(100)])
+            .constraints([Constraint::Percentage(5), Constraint::Percentage(95)])
             .split(chunks[1]);
 
         let dialog_line = Line::styled(dialog.line.clone(), Style::default().bold());
+        let paragraph = Paragraph::new(dialog_line).wrap(Wrap { trim: true });
 
-        let mut list_items = Vec::<ListItem>::new();
-        if let Some(options) = &dialog.options {
-            for option in options {
-                let option = format!("{} ({})", option.line, option.tone);
-                let line = Line::from(option);
-                list_items.push(ListItem::new(line));
-            }
-        }
-
-        let paragraph = Paragraph::new(dialog_line);
         frame.render_widget(paragraph, main_chunks[0]);
-        let list = List::new(list_items)
-            .highlight_symbol(">")
-            .highlight_style(SELECTED_STYLE);
-        frame.render_widget(list, main_chunks[1]);
+
+        if let Some(options) = &dialog.options {
+            let mut items: Vec<ListItem> = Vec::new();
+            for option in options {
+                items.push(option.into())
+            }
+
+            let list = List::new(items)
+                .highlight_style(SELECTED_STYLE)
+                .highlight_symbol("> ")
+                .highlight_spacing(ratatui::widgets::HighlightSpacing::WhenSelected);
+
+            frame.render_stateful_widget(list, main_chunks[1], &mut app.option_state);
+        }
     } else {
-        if let Some(error) = &app.error {
-            let paragraph = Paragraph::new(error.as_str()).centered().red().bold();
-            frame.render_widget(paragraph, chunks[1]);
-        } else {
-            let paragraph = Paragraph::new("Please generate a dialog.")
-                .centered()
-                .bold();
-            frame.render_widget(paragraph, chunks[1]);
+        match &app.app_state {
+            AppState::Error(err) => {
+                let paragraph = Paragraph::new(err.as_str()).centered().red().bold();
+                frame.render_widget(paragraph, chunks[1]);
+            }
+            AppState::Pulling => {
+                let paragraph = Paragraph::new("Pulling model...")
+                    .centered()
+                    .bold()
+                    .italic();
+                frame.render_widget(paragraph, chunks[1]);
+            }
+            AppState::Generating => {
+                let paragraph = Paragraph::new("Generating...").centered().bold().italic();
+                frame.render_widget(paragraph, chunks[1]);
+            }
+            AppState::Idle => {
+                // let paragraph = Paragraph::new("Please generate a dialog, by pressing G.")
+                //     .centered()
+                //     .bold();
+                // frame.render_widget(paragraph, chunks[1]);
+                let idle_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([Constraint::Percentage(5), Constraint::Percentage(95)])
+                    .split(chunks[1]);
+
+                let header = Paragraph::new("Models available:").bold();
+
+                let models = &app.models_available;
+                let mut items = vec![];
+                for model in models {
+                    items.push(model.model.clone());
+                }
+                let list = List::new(items);
+
+                frame.render_widget(header, idle_chunks[0]);
+                frame.render_widget(list, idle_chunks[1]);
+            }
         }
     }
 }
 
-fn render_header(frame: &mut Frame, area: Rect) {
-    let header = Paragraph::new("Date-A-Package-Manager!").bold().centered();
+fn render_header(frame: &mut Frame, area: Rect, state: &AppState) {
+    let title = Span::styled("Date-A-Package-Manager!", Style::default().bold());
+    let mut line = vec![title.clone()];
+
+    if let AppState::Generating = state {
+        line.push(Span::styled(" - generating...", Style::default().italic()));
+    } else {
+        line = vec![title];
+    }
+
+    let header = Paragraph::new(Line::from(line)).centered();
 
     frame.render_widget(header, area);
 }
@@ -69,7 +109,7 @@ fn render_footer(frame: &mut Frame, area: Rect) {
         "Quit ".into(),
         "<Q> ".blue().bold(),
         " Generate dialog ".into(),
-        "<Enter>".blue().bold(),
+        "<G>".blue().bold(),
     ]);
     let footer = Paragraph::new(line).centered();
 
